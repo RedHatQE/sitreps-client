@@ -19,14 +19,15 @@ class UnzipRepo:
 
     Args:
         repo_slug (str): <repo-owner>/<repo-name>
-        branch (str, optional): Master banch which like to point; Defaults to "master".
-        provider (str, optional): Version control tool (github/gitlab). Defaults to "github".
+        branch (str, optional): Master branch which like to point; Defaults to "master".
+        provider (str, optional): Version control tool (github/gitlab/gitlab-cce). Default "github".
         auth_token (str, optional): Authentication token for private repository.
     """
 
     URLS = {
         "github": "https://github.com/{repo_slug}/archive/{branch}.zip",
         "gitlab": "https://gitlab.com/{repo_slug}/-/archive/{branch}.zip",
+        "gitlab-cce": "https://gitlab.cee.redhat.com/{repo_slug}/-/archive/{branch}.zip",
     }
     API_URLS = {"github": "https://api.github.com/repos/{repo_slug}/zipball/{branch}"}
 
@@ -59,7 +60,7 @@ class UnzipRepo:
         LOGGER.info(f"Downloading.. {request_url}")
 
         response, err, *__ = wait_for(
-            lambda: requests.get(request_url, headers=headers),
+            lambda: requests.get(request_url, headers=headers, verify=False),
             delay=2,
             num_sec=7,
         )
@@ -97,5 +98,5 @@ class UnzipRepo:
 
 
 if __name__ == "__main__":
-    with UnzipRepo(repo_slug="RedHatInsights/patchman-engsine") as dest:
+    with UnzipRepo(repo_slug="RedHatInsights/patchman-engine") as dest:
         print(dest)

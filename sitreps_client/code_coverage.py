@@ -123,3 +123,19 @@ class CICoverage:
 
     def __repr__(self):
         return f"<CICoverage(url={self.url})>"
+
+
+def get_code_coverage(repo_slug: str, branch: str = "master") -> Optional[float]:
+    """Get code coverage from codecov.io
+
+    Args:
+        repo_slug (str): Repository slug
+        branch (str, optional): Branch for which Code Coverage fetch. Defaults to "master".
+
+    Returns:
+        Optional[float]: code coverage
+    """
+    code_cov = CodecovCoverage(repo_slug=repo_slug, branch=branch)
+    if code_cov.is_available:
+        return code_cov.get_coverage()
+    return None

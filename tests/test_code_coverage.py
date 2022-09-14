@@ -1,10 +1,12 @@
 import pytest
+
 from sitreps_client.code_coverage import CodecovCoverage
 from sitreps_client.exceptions import CodeCoverageError
 
 
-
-@pytest.mark.parametrize("slug", ["digitronik/varmeth", "digitronik/wrong"], ids=["correct", "wrong"])
+@pytest.mark.parametrize(
+    "slug", ["digitronik/varmeth", "digitronik/wrong"], ids=["correct", "wrong"]
+)
 def test_code_coverage_is_available(slug):
     codecov = CodecovCoverage(repo_slug=slug, branch="master")
 

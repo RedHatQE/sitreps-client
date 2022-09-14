@@ -15,3 +15,7 @@ class DownloadFailed(SitrepsException):
 
 class CodeCoverageError(SitrepsException):
     """Exception for code Coverage."""
+
+
+class IssuesError(SitrepsException):
+    """Error in issues jira/bugzilla"""
