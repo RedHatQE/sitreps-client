@@ -13,8 +13,6 @@ from sitreps_client.utils.repository import UnzipRepo
 
 LOGGER = logging.getLogger(__name__)
 
-# ['sitreps_client', '--folders-to-skip=tests,utils', '--suffix=py,sql,xml']
-
 
 class PygountCloc:
     """Use pygount to count CLOC.
@@ -25,7 +23,6 @@ class PygountCloc:
                                              Defaults to 'py,pyx,go,js,ts,rb,rs,md'.
         folders_to_skip (Union[str, None], optional): Folder you like to skip.
         names_to_skip (Union[str, None], optional): File name you like to skip.
-
     """
 
     DEFAULT_SUFFIX = "py,pyx,go,js,ts,rb,rs,md"
@@ -70,7 +67,10 @@ class PygountCloc:
         return res
 
     def get_cloc_per_lang(self, exclude_tests: bool = False) -> Dict[str, int]:
-        """Get stats per language, with tests code included or excluded."""
+        """Get stats per language, with tests code included or excluded.
+        Args:
+            exclude_tests (bool): Exclude test/test file from analysis.
+        """
         raw_cloc = self.get_raw_cloc()
         files_rec = raw_cloc.replace("\t", " ").split("\n")
         lang_cloc: Dict[str, int] = {}
@@ -116,7 +116,20 @@ def get_cloc(
     names_to_skip: Optional[str] = None,
     exclude_tests: bool = False,
 ) -> Optional[dict]:
-    """Return cloc, with tests code included or excluded."""
+    """Collect CLOC
+
+    Args:
+        path (Path): Project path.
+        repo_slug (str): Repository slug <org:owner>.
+        provider (str): Repository codebase (github/gitlab/gitlab-cce). Default "github".
+        auth_token (str): Token for downloading protected repositories.
+        branch (str): Repository branch
+        suffix (str): To limit the analysis on certain file types,
+                      Defaults to 'py,pyx,go,js,ts,rb,rs,md'.
+        folders_to_skip (str): Folder you like to skip.
+        names_to_skip (str): File name you like to skip.
+        exclude_tests (bool): Do you like to skip tests.
+    """
     assert path or repo_slug, "You need to specify path or repo_slug"
     cloc = {}
 
@@ -145,16 +158,12 @@ def get_cloc(
     return cloc
 
 
-def main():  # pragma: no cover
+if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
 
     from pathlib import Path
 
     cloc_path = get_cloc(path=Path(".").parent.parent)
     print(cloc_path)
-    cloc_repo = get_cloc(repo_slug="digitronik/sitreps-server")
+    cloc_repo = get_cloc(repo_slug="insights-qe/iqe-patchman-plugin", provider="gitlab-cce")
     print(cloc_repo)
-
-
-if __name__ == "__main__":
-    main()
