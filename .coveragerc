@@ -1,0 +1,5 @@
+[run]
+source = sitreps_client
+
+[report]
+ignore_errors = True
