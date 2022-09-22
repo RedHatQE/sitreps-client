@@ -27,7 +27,7 @@ class UnzipRepo:
     URLS = {
         "github": "https://github.com/{repo_slug}/archive/{branch}.zip",
         "gitlab": "https://gitlab.com/{repo_slug}/-/archive/{branch}.zip",
-        "gitlab-cce": "https://gitlab.cee.redhat.com/{repo_slug}/-/archive/{branch}.zip",
+        "gitlab-cee": "https://gitlab.cee.redhat.com/{repo_slug}/-/archive/{branch}.zip",
     }
     API_URLS = {"github": "https://api.github.com/repos/{repo_slug}/zipball/{branch}"}
 

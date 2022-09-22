@@ -13,10 +13,13 @@ classifiers = [
   "Topic :: Software Development :: Testing",
 ]
 dependencies = [
+  "python-box",
   "requests",
   "pygount",
+  "jira",
+  "python-dotenv",
 ]
-description = "A client to sent sitresps results to an Sitreps server"
+description = "A client help to collect different metrics."
 dynamic = ["version"]
 license = "MIT"
 maintainers = [{name = "Nikhil Dhandare", email = "ndhandre@redhat.com"}]
@@ -29,7 +32,8 @@ Source = "https://github.com/digitronik/sitreps-client"
 [project.optional-dependencies]
 test = [
   "pre-commit",
-  "pytest"
+  "pytest",
+  "ipython",
 ]
 
 [build-system]
