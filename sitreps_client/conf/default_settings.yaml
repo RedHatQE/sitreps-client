@@ -1,0 +1,26 @@
+default:
+  jira:
+    url:
+    username:
+    password:
+    token:
+    # JQL
+    base_query: project = "{project}" AND type = {type}'
+    custom_filter:      # Different applications under single jira project.
+    # Jira JQL filters
+    filters:
+      all_resolved: resolution != Unresolved
+      all_unresolved: resolution = Unresolved
+      todo: resolution = Unresolved AND status in ("To Do", Backlog, "Back Log", FAILED_QA, "Failed QA")
+      on_qa: resolution = Unresolved AND status in (ON_QA, "On QA", Verification)
+      review: resolution = Unresolved AND status in (CODE_REVIEW, "Code Review")
+      blocked: resolution = Unresolved AND status in (BLOCK, Blocked, "Blocked/On Hold", "Blocked / Stalled", "Blocked External")
+      rejected: resolution = Unresolved AND status in (Rejected, Abandoned, "Rejected from customer")
+      in_progress: resolution = Unresolved AND status in ("In Progress", "In Development")
+      created_last_month: createdDate >= "-30d"
+      todo_older_than_60d: resolution = Unresolved AND status in ("To Do", Backlog, "Back Log", FAILED_QA, "Failed QA") AND createdDate < "-60d"
+  jenkins:  # To access Jenkins jobs
+    username:
+    token:
+  github:
+    token:    # Access token to download archives

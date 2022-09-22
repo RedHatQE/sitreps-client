@@ -10,9 +10,6 @@ from sitreps_client.exceptions import SitrepsError
 from sitreps_client.utils.ci_downloader import CIDownloader
 from sitreps_client.utils.helpers import wait_for
 
-
-# from sitreps.ci_downloader import CIDownloader
-
 LOGGER = logging.getLogger(__name__)
 
 
@@ -90,7 +87,7 @@ def get_regex_cov(pattern: str, string: str) -> Optional[float]:
     try:
         return float(match.group(1))
     except (IndexError, ValueError) as err:
-        LOGGER.warning("Skipping tests coverage, failure: %s", str(err))
+        LOGGER.warning("Coverage, failure: %s", str(err))
         return None
 
 
@@ -100,7 +97,13 @@ def get_htmlcov(string: str) -> Optional[float]:
 
 
 class CICoverage:
-    """Code coverage from CI log (Jenkins, ...)."""
+    """Code coverage from CI log (Jenkins, ...).
+
+    Args:
+        url (str): CI raw link (eg. jenkins job raw link)
+        ci_downloader (CIDownloader): Instance of CI downloader (eg. JenkinsDownloader)
+        pattern (str, optional): Match pattern
+    """
 
     def __init__(self, url: str, ci_downloader: CIDownloader, pattern: Optional[str] = None):
         self.url = url
@@ -136,6 +139,7 @@ def get_code_coverage(repo_slug: str, branch: str = "master") -> Optional[float]
         Optional[float]: code coverage
     """
     code_cov = CodecovCoverage(repo_slug=repo_slug, branch=branch)
+    # TODO: Add CICoverage facility.
     if code_cov.is_available:
         return code_cov.get_coverage()
     return None

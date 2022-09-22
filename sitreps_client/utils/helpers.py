@@ -6,6 +6,7 @@ from typing import Any
 from typing import Tuple
 
 import yaml
+from box import Box
 
 LOGGER = getLogger(__name__)
 
@@ -75,5 +76,12 @@ def merge_dicts(dict_a, dict_b):
             dict_a[key] = value
         else:
             merge_dicts(dict_a[key], value)
+    return Box(dict_a)
 
-    return dict_a
+
+def get_repo_slug(url: str) -> str:
+    """Return repository slug ('user/repository_name') for the repository URL."""
+    url = url.rstrip("/")
+    components = url.split("/")
+    repo_slug = "/".join(components[-2:])
+    return repo_slug

@@ -39,6 +39,7 @@ class JenkinsDownloader(CIDownloader):
     def get_text(self, url: str) -> str:
         """Return log content from the Jenkins CI."""
         response, err, *__ = wait_for(lambda: self.session.get(url), delay=2, num_sec=7)
+
         if err:
             raise SitrepsError(str(err))
 
