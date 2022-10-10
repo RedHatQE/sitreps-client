@@ -20,7 +20,7 @@ class PygountCloc:
     Args:
         path (Path): Project path.
         suffix (Union[str, None], optional): To limit the analysis on certain file types,
-                                             Defaults to 'py,pyx,go,js,ts,rb,rs,md'.
+                                             eg. 'py,pyx,go,js,ts,rb,rs,md'.
         folders_to_skip (Union[str, None], optional): Folder you like to skip.
         names_to_skip (Union[str, None], optional): File name you like to skip.
     """
@@ -44,11 +44,8 @@ class PygountCloc:
         args = [str(self.path)]
 
         if self.suffix:
-            LOGGER.info(f"Overwriting default pygount suffix with: {self.suffix}")
-            suffix = self.suffix
-        else:
-            suffix = self.DEFAULT_SUFFIX
-        args.append(f"--suffix={suffix}")
+            LOGGER.info(f"Limiting pyground analysis with suffix: {self.suffix}")
+            args.append(f"--suffix={self.suffix}")
 
         if self.folders_to_skip:
             args.append(f"--folders-to-skip={self.folders_to_skip}")
@@ -56,7 +53,7 @@ class PygountCloc:
         if self.names_to_skip:
             args.append(f"--names-to-skip={self.names_to_skip}")
 
-        LOGGER.info(f"pyground args: {args}")
+        LOGGER.info(f"Pygount args: {args}")
         return args
 
     def get_raw_cloc(self) -> str:
@@ -132,16 +129,15 @@ def get_cloc(
     """
     assert path or repo_slug, "You need to specify path or repo_slug"
     cloc = {}
-
     if path:
-        LOGGER.info(f"pyground using direct path: {path}.")
+        LOGGER.info(f"Pygount using direct path: {path}.")
         _pygountcloc = PygountCloc(
             path=path, suffix=suffix, folders_to_skip=folders_to_skip, names_to_skip=names_to_skip
         )
         cloc = _pygountcloc.get_cloc_per_lang(exclude_tests=exclude_tests)
 
     if not path and repo_slug:
-        LOGGER.info(f"pyground using repo-slug for path: {repo_slug}.")
+        LOGGER.info(f"Pygount using repo-slug for path: {repo_slug}.")
         with UnzipRepo(
             repo_slug=repo_slug,
             provider=provider,
