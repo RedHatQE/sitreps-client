@@ -6,6 +6,7 @@ from box import Box
 
 from sitreps_client.cloc import get_cloc as _get_cloc
 from sitreps_client.code_coverage import get_code_coverage as _get_code_coverage
+from sitreps_client.issues import get_issues as _get_issues
 from sitreps_client.utils.helpers import load_file
 from sitreps_client.utils.helpers import merge_dicts
 from sitreps_client.utils.path import CONF_PATH
@@ -20,7 +21,7 @@ SUPPORTED_SONARQUBE_ARGS = {"project_id", "host", "token"}
 class ProjectGroup:
     """Project Group (bundle) which hold different Projects (components)."""
 
-    id: str
+    name: str
     title: str = field(repr=False)
     projects: list = field(default=[], repr=False)
 
@@ -106,7 +107,7 @@ class Repository:
 class Project:
     """Project (component) which hold different repos information."""
 
-    id: str
+    name: str
     default_config: dict = field(repr=False)
     project_group: ProjectGroup = None
     _conf_path: Path = field(default=CONF_PATH, repr=False)
@@ -116,7 +117,7 @@ class Project:
     def config(self):
         """Actual config, merged default config with project level."""
         if not self._conf:
-            path = self._conf_path / f"{self.id}.yaml"
+            path = self._conf_path / f"{self.name}.yaml"
             assert path.exists(), f"Component config path not found {path.resolve()}"
             comp_conf = load_file(path=path)
             # Need to match with default (dyanaconf) conf.
@@ -136,3 +137,9 @@ class Project:
             # Include
             repos.append(Repository.from_config(rep_conf=repo))
         return repos
+
+    def get_jira_issues(self):
+        config = self.config.jira
+        if config.project:
+            return _get_issues(**config), config.project
+        return {}, None
