@@ -18,6 +18,7 @@ dependencies = [
   "pygount",
   "jira",
   "python-dotenv",
+  "PyTravisCI",
 ]
 description = "A client help to collect different metrics."
 dynamic = ["version"]

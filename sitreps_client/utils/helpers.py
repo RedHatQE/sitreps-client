@@ -1,4 +1,5 @@
 import json
+import re
 import time
 from logging import getLogger
 from pathlib import Path
@@ -85,3 +86,9 @@ def get_repo_slug(url: str) -> str:
     components = url.split("/")
     repo_slug = "/".join(components[-2:])
     return repo_slug
+
+
+def escape_ansi(string: str) -> str:
+    """Remove escape characters from a string."""
+    ansi_escape = re.compile(r"(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]")
+    return ansi_escape.sub("", string)

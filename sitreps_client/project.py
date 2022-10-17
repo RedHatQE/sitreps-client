@@ -1,3 +1,4 @@
+from logging import getLogger
 from pathlib import Path
 
 from attr import define
@@ -7,14 +8,16 @@ from box import Box
 from sitreps_client.cloc import get_cloc as _get_cloc
 from sitreps_client.code_coverage import get_code_coverage as _get_code_coverage
 from sitreps_client.issues import get_issues as _get_issues
+from sitreps_client.unit_tests import get_unit_tests as _get_unit_tests
 from sitreps_client.utils.helpers import load_file
 from sitreps_client.utils.helpers import merge_dicts
 from sitreps_client.utils.path import CONF_PATH
 
 SUPPORTED_HOSTS = ("github", "gitlab-cee", "gitlab")
 SUPPORTED_CLOC_ARGS = {"suffix", "folders_to_skip", "names_to_skip", "exclude_tests", "auth_token"}
-SUPPORTED_UNITTEST_ARGS = {"travis", "github_action", "jenkins"}
+SUPPORTED_UNITTEST_ARGS = {"travis", "gh_action", "jenkins"}
 SUPPORTED_SONARQUBE_ARGS = {"project_id", "host", "token"}
+LOGGER = getLogger(__name__)
 
 
 @define
@@ -101,6 +104,26 @@ class Repository:
     def get_metadata(self):
         """Get Integration test metadata"""
         raise NotImplementedError("Need to implement at project level.")
+
+    def get_unit_tests(self):
+        """Get Unit tests count."""
+        _args = {}
+        if "travis" in self._unit_tests and self._unit_tests.travis.is_private is not None:
+            LOGGER.debug(f"Travis is enabled for {self.title}")
+            _args["travis"] = self._unit_tests.travis
+            _args["travis"]["repo_slug"] = self.repo_slug
+            _args["travis"]["branch"] = self.branch
+
+        if "gh_action" in self._unit_tests and self._unit_tests.gh_action.workflow is not None:
+            LOGGER.debug(f"GitHub Actions is enabled for {self.title}")
+            _args["gh_action"] = self._unit_tests.gh_action
+            _args["gh_action"]["repo_slug"] = self.repo_slug
+            _args["gh_action"]["branch"] = self.branch
+
+        if "jenkins" in self._unit_tests and self._unit_tests.jenkins.url is not None:
+            LOGGER.debug(f"Jenkins is enabled for {self.title}")
+            _args["jenkins"] = self._unit_tests.jenkins
+        return _get_unit_tests(**_args)
 
 
 @define
