@@ -25,6 +25,9 @@ class JenkinsDownloader(CIDownloader):
         self.no_auth = no_auth
         self._session = None
 
+        if not (username and token) and no_auth is False:
+            raise ValueError("Username and token are needed for Jenkins auth.")
+
     @property
     def session(self):
         if self._session is None:
