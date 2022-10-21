@@ -19,6 +19,7 @@ dependencies = [
   "jira",
   "python-dotenv",
   "PyTravisCI",
+  "python-sonarqube-api",
 ]
 description = "A client help to collect different metrics."
 dynamic = ["version"]

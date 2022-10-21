@@ -61,8 +61,8 @@ class BaseUnitTests:
                 tools_found.append("npm")
             if "rake " in line and "validate" in line:
                 tools_found.append("rake")
-            if "mvn" in line:
-                tools_found.append("mvn")
+            if "maven" in line:
+                tools_found.append("maven")
 
         tools_found = set(tools_found)
 
