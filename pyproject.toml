@@ -20,6 +20,7 @@ dependencies = [
   "python-dotenv",
   "PyTravisCI",
   "python-sonarqube-api",
+  "cached-property",
 ]
 description = "A client help to collect different metrics."
 dynamic = ["version"]
