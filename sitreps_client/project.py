@@ -1,9 +1,7 @@
 from logging import getLogger
 from pathlib import Path
 
-from attr import define
-from attr import field
-from box import Box
+from cached_property import cached_property
 
 from sitreps_client.cloc import get_cloc as _get_cloc
 from sitreps_client.code_coverage import get_code_coverage as _get_code_coverage
@@ -21,45 +19,67 @@ SUPPORTED_SONARQUBE_ARGS = {"project_key", "host", "token"}
 LOGGER = getLogger(__name__)
 
 
-@define
 class ProjectGroup:
     """Project Group (bundle) which hold different Projects (components)."""
 
-    name: str
-    title: str = field(repr=False)
-    projects: list = field(default=[], repr=False)
+    def __init__(self, name: str, title: str, projects: list = None):
+        self.name = name
+        self.title = title
+        self.projects = projects if projects else []
+
+    def __repr__(self):
+        return f"ProjectGroup({self.name})"
 
 
-@define
 class Repository:
     """Project repository."""
 
-    title: str
-    url: str
-    branch: str = "master"
-    type: str = "test"
-    _cloc: dict = field(default={}, repr=False)
-    _sonarqube: dict = field(default={}, repr=False)
-    _unit_tests: dict = field(default={}, repr=False)
+    def __init__(
+        self,
+        title: str,
+        url: str,
+        branch: str = "master",
+        type: str = "test",
+        cloc: dict = None,
+        sonarqube: dict = None,
+        unit_tests: dict = None,
+    ):
+        self.title = title
+        self.url = url
+        self.branch = branch
+        self.type = type
+        self._cloc = cloc if cloc else {}
+        self._sonarqube = sonarqube if sonarqube else {}
+        self._unit_tests = unit_tests if unit_tests else {}
 
-    @_cloc.validator
-    def _val_cloc(self, attribute, value):
-        if value and not set(value.keys()).issubset(SUPPORTED_CLOC_ARGS):
-            raise ValueError(f"Supported cloc params are: {SUPPORTED_CLOC_ARGS}")
+        if self._cloc and not set(self._cloc.keys()).issubset(SUPPORTED_CLOC_ARGS):
+            raise ValueError(
+                f"Supported cloc params are: {SUPPORTED_CLOC_ARGS} and provided: "
+                f"{self._cloc.keys()}"
+            )
+        if self._sonarqube and not set(self._sonarqube.keys()).issubset(SUPPORTED_SONARQUBE_ARGS):
+            raise ValueError(
+                f"Supported sonarqube params are: {SUPPORTED_SONARQUBE_ARGS} and provided: "
+                f"{self._sonarqube.keys()}"
+            )
 
-    @_sonarqube.validator
-    def _val_sonar(self, attribute, value):
-        if value and not set(value.keys()).issubset(SUPPORTED_SONARQUBE_ARGS):
-            raise ValueError(f"Supported cloc params are: {SUPPORTED_SONARQUBE_ARGS}")
-
-    @_unit_tests.validator
-    def _val_unit_test(self, attribute, value):
-        if value and not set(value.keys()).issubset(SUPPORTED_UNITTEST_ARGS):
-            raise ValueError(f"Supported cloc params are: {SUPPORTED_UNITTEST_ARGS}")
+        if self._unit_tests and not set(self._unit_tests.keys()).issubset(SUPPORTED_UNITTEST_ARGS):
+            raise ValueError(
+                f"Supported unit tests params are: {SUPPORTED_UNITTEST_ARGS} and provided: "
+                f"{self._unit_tests.keys()}"
+            )
 
     @classmethod
     def from_config(cls, rep_conf):
-        return cls(**rep_conf)
+        return cls(
+            title=rep_conf.get("title"),
+            url=rep_conf.get("url"),
+            branch=rep_conf.get("branch", "master"),
+            type=rep_conf.get("type", "test"),
+            cloc=rep_conf.get("cloc"),
+            sonarqube=rep_conf.get("sonarqube"),
+            unit_tests=rep_conf.get("unit_tests"),
+        )
 
     @property
     def repo_slug(self):
@@ -68,12 +88,12 @@ class Repository:
         components = url.split("/")
         return "/".join(components[-2:])
 
-    @property
+    @cached_property
     def name(self):
         """Return name of repository."""
         return self.repo_slug.split("/")[-1]
 
-    @property
+    @cached_property
     def provider(self):
         """Return host of repository ["github", "gitlab-cee" ,"gitlab"]."""
         for _host in SUPPORTED_HOSTS:
@@ -135,27 +155,34 @@ class Repository:
             return _get_sonar_metrics(**_args)
         LOGGER.info(f"[SonarQube-{self.repo_slug}]: Not enabled.")
 
+    def __repr__(self):
+        return f"Repository(name={self.name}, type={self.type}, branch={self.branch})"
 
-@define
+
 class Project:
     """Project (component) which hold different repos information."""
 
-    name: str
-    default_config: dict = field(repr=False)
-    project_group: ProjectGroup = None
-    _conf_path: Path = field(default=CONF_PATH, repr=False)
-    _conf: Box = None
+    def __init__(
+        self,
+        name: str,
+        default_config: dict,
+        project_group: ProjectGroup = None,
+        conf_path: Path = CONF_PATH,
+    ):
+        self.name = name
+        self.default_config = default_config
+        self.project_group = project_group
+        self._conf_path = conf_path
 
-    @property
+    @cached_property
     def config(self):
         """Actual config, merged default config with project level."""
-        if not self._conf:
-            path = self._conf_path / f"{self.name}.yaml"
-            assert path.exists(), f"Component config path not found {path.resolve()}"
-            comp_conf = load_file(path=path)
-            # Need to match with default (dyanaconf) conf.
-            self._conf = merge_dicts(self.default_config, comp_conf)
-        return self._conf
+        path = self._conf_path / f"{self.name}.yaml"
+        assert path.exists(), f"Component config path not found {path.resolve()}"
+        comp_conf = load_file(path=path)
+        # Need to match with default (dyanaconf) conf.
+        conf = merge_dicts(self.default_config, comp_conf)
+        return conf
 
     @property
     def repositories(self):
@@ -176,3 +203,6 @@ class Project:
         if config.project:
             return _get_issues(**config), config.project
         return {}, None
+
+    def __repr__(self):
+        return f"Project({self.name})"
