@@ -306,11 +306,10 @@ class TravisUnitTests(BaseUnitTests):
         build = builds[0]  # Select first build i.e. latest one.
         LOGGER.info(f"[Travis-{self.repo_slug}]: Latest build: {build.id}")
         jobs = build.get_jobs().jobs
-        test_stages_numbers = [
-            stage.number for stage in build.stages if "test" in stage.name.lower()
-        ]
-        if test_stages_numbers:
-            jobs = [jobs[stage_number] for stage_number in test_stages_numbers]
+        test_jobs = [job for job in jobs if job.stage and "test" in job.stage.name.lower()]
+        if test_jobs:
+            LOGGER.info(f"[Travis-{self.repo_slug}]: Test jobs detected. Limiting scan.")
+            jobs = test_jobs
 
         for job in jobs:
             try:
