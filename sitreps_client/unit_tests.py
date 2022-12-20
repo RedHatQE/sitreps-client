@@ -197,7 +197,12 @@ class GHActionUnitTests(BaseUnitTests):
         """Get github actions runs for repo."""
         resp = requests.get(
             self.GH_ACTION_RUNS.format(repo_slug=self.repo_slug),
-            params={"branch": self.branch, "conclusion": "success"},
+            params={
+                "branch": self.branch,
+                "conclusion": "success",
+                "exclude_pull_requests": "true",
+                "per_page": 75,
+            },
             auth=self._auth,
         )
         if not resp.ok:
