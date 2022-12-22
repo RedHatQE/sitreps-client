@@ -22,7 +22,7 @@ from sitreps_client.utils.helpers import escape_ansi
 
 LOGGER = logging.getLogger(__name__)
 
-KNOWN_TESTING_TOOLS = ("gotest", "pytest", "pyunittest", "npm", "rake", "maven", "other")
+KNOWN_TESTING_TOOLS = ("gotest", "pytest", "pyunittest", "npm", "rake", "maven", "junit", "other")
 
 
 class TokenAuth(AuthBase):
@@ -159,6 +159,17 @@ class BaseUnitTests:
                 except (IndexError, AttributeError):
                     pass
                 continue
+
+            # junit
+            if "junit" in tools and "Executed " in line and " tests" in line:
+                LOGGER.debug(f"junit: {line}")
+                try:
+                    tests_count += int(
+                        re.search("Executed ([0-9]+) tests", line).group(1)  # type: ignore
+                    )
+                except (IndexError, AttributeError):
+                    pass
+                break
 
             # ??
             if "other" in tools and "Suite duration: " in line and " Tests: " in line:
