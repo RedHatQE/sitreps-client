@@ -22,7 +22,17 @@ from sitreps_client.utils.helpers import escape_ansi
 
 LOGGER = logging.getLogger(__name__)
 
-KNOWN_TESTING_TOOLS = ("gotest", "pytest", "pyunittest", "npm", "rake", "maven", "junit", "other")
+KNOWN_TESTING_TOOLS = (
+    "gotest",
+    "pytest",
+    "pyunittest",
+    "npm",
+    "rake",
+    "maven",
+    "junit",
+    "other",
+    "busted",
+)
 
 
 class TokenAuth(AuthBase):
@@ -63,6 +73,8 @@ class BaseUnitTests:
                 tools_found.append("rake")
             if "maven" in line:
                 tools_found.append("maven")
+            if "lualib" in line:
+                tools_found.append("busted")
 
         tools_found = set(tools_found)
 
@@ -114,8 +126,8 @@ class BaseUnitTests:
                     tests_count += int(
                         re.search("collected ([0-9]+) items", line).group(1)  # type: ignore
                     )
-                except (IndexError, AttributeError):
-                    pass
+                except (IndexError, AttributeError) as e:
+                    LOGGER.error(f"LogParsing: {e}")
                 continue
 
             # python unit tests
@@ -125,8 +137,8 @@ class BaseUnitTests:
                     tests_count += int(
                         re.search("Ran ([0-9]+) tests in", line).group(1)  # type: ignore
                     )
-                except (IndexError, AttributeError):
-                    pass
+                except (IndexError, AttributeError) as e:
+                    LOGGER.error(f"LogParsing: {e}")
                 continue
 
             # javascript; npm/yarn
@@ -136,8 +148,8 @@ class BaseUnitTests:
                     tests_count += int(
                         re.search("Tests:.+, ([0-9]+) total", line).group(1)  # type: ignore
                     )
-                except (IndexError, AttributeError):
-                    pass
+                except (IndexError, AttributeError) as e:
+                    LOGGER.error(f"LogParsing: {e}")
                 continue
 
             # rake validate
@@ -145,8 +157,8 @@ class BaseUnitTests:
                 LOGGER.debug(f"rake: {line}")
                 try:
                     tests_count += int(re.search("([0-9]+) tests,", line).group(1))  # type: ignore
-                except (IndexError, AttributeError):
-                    pass
+                except (IndexError, AttributeError) as e:
+                    LOGGER.error(f"LogParsing: {e}")
                 continue
 
             # maven java unit test
@@ -156,8 +168,8 @@ class BaseUnitTests:
                 LOGGER.debug(f"maven: {line}")
                 try:
                     tests_count += int(re.search("Tests run: ([0-9]+),", line).group(1))
-                except (IndexError, AttributeError):
-                    pass
+                except (IndexError, AttributeError) as e:
+                    LOGGER.error(f"LogParsing: {e}")
                 continue
 
             # junit
@@ -167,8 +179,23 @@ class BaseUnitTests:
                     tests_count += int(
                         re.search("Executed ([0-9]+) tests", line).group(1)  # type: ignore
                     )
-                except (IndexError, AttributeError):
-                    pass
+                except (IndexError, AttributeError) as e:
+                    LOGGER.error(f"LogParsing: {e}")
+                break
+
+            # busted: is a unit testing framework with a focus on being easy to use. Supports
+            # Lua >= 5.1, luajit >= 2.0.0, and moonscript.
+            if "busted" in tools and "successes " in line and "failures" in line:
+                LOGGER.debug(f"busted: {line}")
+                try:
+                    tests = re.search(
+                        "([0-9]+) successes / ([0-9]+) failures / ([0-9]+) errors / "
+                        "([0-9]+) pending",
+                        line,
+                    )
+                    tests_count += sum([int(n) for n in tests.groups()])
+                except (IndexError, AttributeError) as e:
+                    LOGGER.error(f"LogParsing: {e}")
                 break
 
             # ??
@@ -176,8 +203,8 @@ class BaseUnitTests:
                 LOGGER.debug(f"other: {line}")
                 try:
                     tests_count += int(re.search("Tests: ([0-9]+)", line).group(1))  # type: ignore
-                except (IndexError, AttributeError):
-                    pass
+                except (IndexError, AttributeError) as e:
+                    LOGGER.error(f"LogParsing: {e}")
                 continue
 
         return tests_count
