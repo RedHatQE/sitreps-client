@@ -139,7 +139,7 @@ class BaseUnitTests:
                     )
                 except (IndexError, AttributeError) as e:
                     LOGGER.error(f"LogParsing: {e}")
-                continue
+                break
 
             # python unit tests
             if "pyunittest" in tools and "Ran " in line and " tests in " in line:
@@ -150,7 +150,7 @@ class BaseUnitTests:
                     )
                 except (IndexError, AttributeError) as e:
                     LOGGER.error(f"LogParsing: {e}")
-                continue
+                break
 
             # javascript; npm/yarn
             if "npm" in tools and "Tests:" in line and " total" in line:
@@ -161,7 +161,7 @@ class BaseUnitTests:
                     )
                 except (IndexError, AttributeError) as e:
                     LOGGER.error(f"LogParsing: {e}")
-                continue
+                break
 
             # rake validate
             if "rake" in tools and all(exp in line for exp in ("tests", "assertions", "failures")):
@@ -170,7 +170,7 @@ class BaseUnitTests:
                     tests_count += int(re.search("([0-9]+) tests,", line).group(1))  # type: ignore
                 except (IndexError, AttributeError) as e:
                     LOGGER.error(f"LogParsing: {e}")
-                continue
+                break
 
             # maven java unit test
             if "maven" in tools and all(
@@ -310,7 +310,11 @@ class GHActionUnitTests(BaseUnitTests):
             LOGGER.warning(f"[GhAction-{self.repo_slug}]: No logs/runs collected.")
             return 0
 
-        return sum(self._get_tests_count(log.decode(), test_tool=self.test_tool) for log in logs)
+        for log in logs:
+            num_of_tests = self._get_tests_count(log.decode(), test_tool=self.test_tool)
+            if num_of_tests > 0:
+                return num_of_tests
+        return 0
 
     def __repr__(self):
         return f"<GHActionUnitTests(repo_slug={self.repo_slug})>"
