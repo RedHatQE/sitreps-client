@@ -19,6 +19,7 @@ from sitreps_client.exceptions import SitrepsError
 from sitreps_client.utils.ci_downloader import CIDownloader
 from sitreps_client.utils.ci_downloader import JenkinsDownloader
 from sitreps_client.utils.helpers import escape_ansi
+from sitreps_client.utils.helpers import wait_for
 
 LOGGER = logging.getLogger(__name__)
 
@@ -246,21 +247,27 @@ class GHActionUnitTests(BaseUnitTests):
 
     def get_runs(self):
         """Get github actions runs for repo."""
-        resp = requests.get(
-            self.GH_ACTION_RUNS.format(repo_slug=self.repo_slug),
-            params={
-                "branch": self.branch,
-                "conclusion": "success",
-                "exclude_pull_requests": "true",
-                "per_page": 75,
-            },
-            auth=self._auth,
+        response, err, *__ = wait_for(
+            lambda: requests.get(
+                self.GH_ACTION_RUNS.format(repo_slug=self.repo_slug),
+                params={
+                    "branch": self.branch,
+                    "conclusion": "success",
+                    "exclude_pull_requests": "true",
+                    "per_page": 75,
+                },
+                auth=self._auth,
+            ),
+            delay=2,
+            num_sec=3,
+            ignore_falsy=True,
         )
-        if not resp.ok:
-            LOGGER.error(f"[GhAction-{self.repo_slug}]: Unable to fetch runs: {resp.reason}")
-            raise SitrepsError(f"Unable to fetch runs: {resp.reason}")
 
-        data = resp.json()
+        if not response.ok:
+            LOGGER.error(f"[GhAction-{self.repo_slug}]: Unable to fetch runs: {response.reason}")
+            raise SitrepsError(f"Unable to fetch runs: {response.reason}")
+
+        data = response.json()
         runs = data.get("workflow_runs")
         if not runs:
             LOGGER.warning(
@@ -287,15 +294,19 @@ class GHActionUnitTests(BaseUnitTests):
             return logs
         run = runs[0]  # select first one
         LOGGER.info(f"[GhAction-{self.repo_slug}]: Latest run: {run['html_url']}")
-        resp = requests.get(runs[0]["logs_url"], auth=TokenAuth(self.github_token))
-        if not resp.ok:
-            LOGGER.error(f"[GhAction-{self.repo_slug}]: Unable to fetch logs {resp.reason}")
-            raise SitrepsError(f"Unable to fetch logs: {resp.reason}")
+        response, err, *__ = wait_for(
+            lambda: requests.get(runs[0]["logs_url"], auth=TokenAuth(self.github_token)),
+            delay=2,
+            num_sec=7,
+        )
+        if not response.ok:
+            LOGGER.error(f"[GhAction-{self.repo_slug}]: Unable to fetch logs {response.reason}")
+            raise SitrepsError(f"Unable to fetch logs: {response.reason}")
 
         zipfile_name = Path(f"/tmp/github_action_log_{uuid4()}.zip")
 
         with open(zipfile_name, "wb") as f:
-            f.write(resp.content)
+            f.write(response.content)
 
         with ZipFile(zipfile_name) as zip_log:
             logfiles = [x for x in zip_log.infolist() if "/" not in x.filename]
