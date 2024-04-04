@@ -18,7 +18,7 @@ dependencies = [
   "pygount",
   "jira",
   "python-dotenv",
-  "PyTravisCI",
+#  "PyTravisCI",
   "python-sonarqube-api",
   "cached-property",
 ]

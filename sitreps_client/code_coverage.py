@@ -1,4 +1,5 @@
 """Code coverage for repositories."""
+
 import logging
 import re
 from typing import Optional

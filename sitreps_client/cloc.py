@@ -1,4 +1,5 @@
 """Count cloc for project and tests repositories."""
+
 import io
 import logging
 from contextlib import redirect_stdout

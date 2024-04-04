@@ -1,18 +1,13 @@
 """Numbers of unit tests for repositories."""
+
 import logging
 import re
 from pathlib import Path
-from typing import Generator
 from typing import Optional
 from uuid import uuid4
 from zipfile import ZipFile
 
 import requests
-from cached_property import cached_property
-from PyTravisCI import TravisCI
-from PyTravisCI.defaults.access_points import OPEN
-from PyTravisCI.defaults.access_points import PRIVATE
-from PyTravisCI.exceptions import TravisCIError
 from requests.auth import AuthBase
 
 from sitreps_client.exceptions import SitrepsError
@@ -20,6 +15,11 @@ from sitreps_client.utils.ci_downloader import CIDownloader
 from sitreps_client.utils.ci_downloader import JenkinsDownloader
 from sitreps_client.utils.helpers import escape_ansi
 from sitreps_client.utils.helpers import wait_for
+
+# from PyTravisCI import TravisCI
+# from PyTravisCI.defaults.access_points import OPEN
+# from PyTravisCI.defaults.access_points import PRIVATE
+# from PyTravisCI.exceptions import TravisCIError
 
 LOGGER = logging.getLogger(__name__)
 
@@ -331,82 +331,86 @@ class GHActionUnitTests(BaseUnitTests):
         return f"<GHActionUnitTests(repo_slug={self.repo_slug})>"
 
 
-class TravisUnitTests(BaseUnitTests):
-    """Number of unit tests from Travis."""
+# Travis not supported by app-sre and PyTravisCI not properly maintain.
 
-    def __init__(
-        self,
-        repo_slug: str,
-        access_token: str = None,
-        branch: str = "master",
-        is_private: bool = True,
-        test_tool: str = None,
-    ):
-        self.repo_slug = repo_slug
-        self.access_token = access_token
-        self.branch = branch
-        self.is_private = is_private
-        self.test_tool = test_tool
-
-    @cached_property
-    def client(self):
-        """Travis client.
-
-        Returns: TravisCI object
-        """
-        if self.access_token:
-            access_point = PRIVATE if self.is_private else OPEN
-            return TravisCI(access_token=self.access_token, access_point=access_point)
-        return TravisCI()
-
-    def get_logs(self) -> Generator[str, None, None]:
-        try:
-            repo = self.client.get_repository(repository_id_or_slug=self.repo_slug)
-        except Exception as e:
-            msg = f"[Travis-{self.repo_slug}]: is it using private travis? is repo used travis?"
-            LOGGER.warning(msg)
-            raise SitrepsError(f"{msg}, Error:{e}")
-
-        builds = repo.get_builds(params={"branch.name": self.branch, "state": "passed", "limit": 1})
-
-        if not builds:
-            raise SitrepsError(
-                f"[Travis-{self.repo_slug}]: Build for branch '{self.branch}' with passed status "
-                f"not found."
-            )
-        build = builds[0]  # Select first build i.e. latest one.
-        LOGGER.info(f"[Travis-{self.repo_slug}]: Latest build: {build.id}")
-        jobs = build.get_jobs().jobs
-        test_jobs = [job for job in jobs if job.stage and "test" in job.stage.name.lower()]
-        if test_jobs:
-            LOGGER.info(f"[Travis-{self.repo_slug}]: Test jobs detected. Limiting scan.")
-            jobs = test_jobs
-
-        for job in jobs:
-            try:
-                log = job.get_log()
-            except TravisCIError as e:
-                raise SitrepsError(f"[Travis-{self.repo_slug}]: {e}")
-            yield log.content
-
-    def get_num_of_tests(self) -> Optional[int]:
-        """Return number of unit tests."""
-        try:
-            log_generator = self.get_logs()
-        # pylint: disable=broad-except
-        except Exception as exc:
-            msg = f"[Travis-{self.repo_slug}]: {exc}"
-            LOGGER.error(msg)
-            return None
-
-        for ci_log in log_generator:
-            num_of_tests = self._get_tests_count(ci_log, test_tool=self.test_tool)
-            if num_of_tests > 0:
-                return num_of_tests
-        return 0
-
-    def __repr__(self):
-        return f"<TravisUnitTests(repo_slug={self.repo_slug})>"
+# class TravisUnitTests(BaseUnitTests):
+#     """Number of unit tests from Travis."""
+#
+#     def __init__(
+#         self,
+#         repo_slug: str,
+#         access_token: str = None,
+#         branch: str = "master",
+#         is_private: bool = True,
+#         test_tool: str = None,
+#     ):
+#         self.repo_slug = repo_slug
+#         self.access_token = access_token
+#         self.branch = branch
+#         self.is_private = is_private
+#         self.test_tool = test_tool
+#
+#     @cached_property
+#     def client(self):
+#         """Travis client.
+#
+#         Returns: TravisCI object
+#         """
+#         if self.access_token:
+#             access_point = PRIVATE if self.is_private else OPEN
+#             return TravisCI(access_token=self.access_token, access_point=access_point)
+#         return TravisCI()
+#
+#     def get_logs(self) -> Generator[str, None, None]:
+#         try:
+#             repo = self.client.get_repository(repository_id_or_slug=self.repo_slug)
+#         except Exception as e:
+#             msg = f"[Travis-{self.repo_slug}]: is it using private travis? is repo used travis?"
+#             LOGGER.warning(msg)
+#             raise SitrepsError(f"{msg}, Error:{e}")
+#
+#         builds = repo.get_builds(
+#         params={"branch.name": self.branch, "state": "passed", "limit": 1}
+#         )
+#
+#         if not builds:
+#             raise SitrepsError(
+#                 f"[Travis-{self.repo_slug}]: Build for branch '{self.branch}' with passed status "
+#                 f"not found."
+#             )
+#         build = builds[0]  # Select first build i.e. latest one.
+#         LOGGER.info(f"[Travis-{self.repo_slug}]: Latest build: {build.id}")
+#         jobs = build.get_jobs().jobs
+#         test_jobs = [job for job in jobs if job.stage and "test" in job.stage.name.lower()]
+#         if test_jobs:
+#             LOGGER.info(f"[Travis-{self.repo_slug}]: Test jobs detected. Limiting scan.")
+#             jobs = test_jobs
+#
+#         for job in jobs:
+#             try:
+#                 log = job.get_log()
+#             except TravisCIError as e:
+#                 raise SitrepsError(f"[Travis-{self.repo_slug}]: {e}")
+#             yield log.content
+#
+#     def get_num_of_tests(self) -> Optional[int]:
+#         """Return number of unit tests."""
+#         try:
+#             log_generator = self.get_logs()
+#         # pylint: disable=broad-except
+#         except Exception as exc:
+#             msg = f"[Travis-{self.repo_slug}]: {exc}"
+#             LOGGER.error(msg)
+#             return None
+#
+#         for ci_log in log_generator:
+#             num_of_tests = self._get_tests_count(ci_log, test_tool=self.test_tool)
+#             if num_of_tests > 0:
+#                 return num_of_tests
+#         return 0
+#
+#     def __repr__(self):
+#         return f"<TravisUnitTests(repo_slug={self.repo_slug})>"
 
 
 class CIUnitTests(BaseUnitTests):
@@ -436,13 +440,15 @@ def get_unit_tests(travis=None, gh_action=None, jenkins=None):
     unit_tests = {}
 
     if travis:
-        LOGGER.info(f"[UnitTests-{travis.get('repo_slug')}]: Collecting with 'travis'.")
-        unit_tests["travis"] = TravisUnitTests(
-            repo_slug=travis.get("repo_slug"),
-            branch=travis.get("branch"),
-            access_token=travis.get("access_token"),
-            test_tool=travis.get("test_tool"),
-        )
+        LOGGER.error("Travis not supported by app-sre.")
+        return dict(travis=0)
+        # LOGGER.info(f"[UnitTests-{travis.get('repo_slug')}]: Collecting with 'travis'.")
+        # unit_tests["travis"] = TravisUnitTests(
+        #     repo_slug=travis.get("repo_slug"),
+        #     branch=travis.get("branch"),
+        #     access_token=travis.get("access_token"),
+        #     test_tool=travis.get("test_tool"),
+        # )
 
     if gh_action:
         LOGGER.info(f"[UnitTests-{gh_action.get('repo_slug')}]: Collecting with 'gh_actions'.")
