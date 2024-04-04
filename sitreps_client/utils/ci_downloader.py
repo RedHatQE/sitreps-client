@@ -1,4 +1,5 @@
 """Downloader for files on CI (Jenkins, ...)."""
+
 import logging
 
 import requests
