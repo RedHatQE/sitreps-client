@@ -11,7 +11,6 @@ from pygount.command import pygount_command
 
 from sitreps_client.utils.repository import UnzipRepo
 
-
 LOGGER = logging.getLogger(__name__)
 
 
@@ -66,6 +65,7 @@ class PygountCloc:
 
     def get_cloc_per_lang(self, exclude_tests: bool = False) -> Dict[str, int]:
         """Get stats per language, with tests code included or excluded.
+
         Args:
             exclude_tests (bool): Exclude test/test file from analysis.
         """
@@ -107,7 +107,6 @@ def get_cloc(
     path: Optional[Path] = None,
     repo_slug: Optional[str] = None,
     provider: str = "github",
-    auth_token: str = "",
     branch: str = "master",
     suffix: Optional[str] = None,
     folders_to_skip: Optional[str] = None,
@@ -142,7 +141,6 @@ def get_cloc(
         with UnzipRepo(
             repo_slug=repo_slug,
             provider=provider,
-            auth_token=auth_token,
             branch=branch,
         ) as dest:
             _pygountcloc = PygountCloc(

@@ -1,6 +1,7 @@
 """Jira/Bugzilla issues."""
 
 import logging
+from enum import Enum
 from typing import Optional
 from typing import Union
 
@@ -9,8 +10,14 @@ from jira import JIRA
 
 from sitreps_client.exceptions import IssuesError
 
-
 LOGGER = logging.getLogger(__name__)
+
+
+class JiraMetricsType(Enum):
+    """Jira metrics type."""
+
+    QE = "qe"
+    DEV = "dev"
 
 
 class JiraIssue:
@@ -31,14 +38,14 @@ class JiraIssue:
                     self.url,
                     token_auth=self.token,
                     validate=True,
-                    timeout=30,
+                    timeout=50,
                     max_retries=5,  # don't retry to connect
                 )
             else:
                 jira_client = JIRA(
                     self.url, options={"verify": False}, basic_auth=(self.username, self.password)
                 )
-            LOGGER.info("Jira client initialized successfully.")
+            LOGGER.debug("Jira client initialized successfully.")
             return jira_client
         # pylint: disable=broad-except
         except Exception as exc:
@@ -50,13 +57,14 @@ class JiraIssue:
         self, jql_str: str, max_results: int = 5000, count: bool = True
     ) -> Optional[Union[int, list]]:
         """Return results for given JQL query.
+
         Args:
             jql_str: JQL query
             max_results: max number of entities.
             count: Do you want result as count or data.
         """
         try:
-            data = self.client.search_issues(jql_str, maxResults=max_results)
+            data = self.client.search_issues(jql_str, maxResults=max_results, fields="id")
             if count:
                 return len(data) if data else 0
             return data
@@ -71,23 +79,30 @@ class JiraIssue:
         self,
         project: str,
         filters: dict,
-        type: str = "Bug",
-        base_query: str = 'project = "{project}" AND type = {type}',
+        base_quary: str,
         custom_filter: str = None,
     ):
-        base_query = base_query.format(project=project, type=type)
-        LOGGER.debug(f"Base Query: {base_query}")
+        base_quary = f"{base_quary} AND " if base_quary.split() else ""
+        if project and custom_filter:
+            query = f"{base_quary}project in ({project}) AND {custom_filter}"
+        elif custom_filter:
+            # If project not provided. It means that either Epic or some custom filter.
+            query = f"{base_quary}{custom_filter}"
+        elif project:
+            query = f"{base_quary}project in ({project})"
 
-        if custom_filter:
-            LOGGER.debug(f"Found custom filter: {custom_filter}")
-            base_query = f"{base_query} AND {custom_filter}"
+        LOGGER.debug(f"Base Query: {query}")
 
         jira_stats = {}
-        for key, filter in filters.items():
-            jql_str = f"{base_query} AND {filter}"
-            LOGGER.debug(f"JQL query for [{key}]: {jql_str}")
-            jira_stats[key] = {"count": self.search_jql(jql_str=jql_str), "jql": jql_str}
 
+        for key, filter in filters.items():
+            jql_str = f"{query} AND {filter}"
+            LOGGER.debug(f"JQL query for [{key}]: {jql_str}")
+            count = self.search_jql(jql_str=jql_str)
+            if count is None:
+                LOGGER.error("Something bad with jql fetch... skipping jira stats.")
+                return {}
+            jira_stats[key] = {"count": count, "jql": jql_str}
         return jira_stats
 
 
@@ -95,21 +110,19 @@ def get_issues(
     url: str,
     project: str,
     filters: dict,
-    type: str = "Bug",
-    base_query: str = 'project = "{project}" AND type = {type}',
+    base_query: str = "type = Bug",
     custom_filter: str = None,
     token: str = None,
     username: str = None,
     password: str = None,
     **kwargs,
 ):
-    LOGGER.info(f"Collecting Jira metrics for project: {project}")
+    LOGGER.debug(f"Collecting Jira metrics for project: {project}")
     jira = JiraIssue(url=url, token=token, username=username, password=password)
     return jira.get_issues(
         project=project,
         filters=filters,
-        type=type,
-        base_query=base_query,
+        base_quary=base_query,
         custom_filter=custom_filter,
     )
 

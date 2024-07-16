@@ -7,7 +7,6 @@ import requests
 from sitreps_client.exceptions import SitrepsError
 from sitreps_client.utils.helpers import wait_for
 
-
 LOGGER = logging.getLogger(__name__)
 
 

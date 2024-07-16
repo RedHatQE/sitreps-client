@@ -1,5 +1,6 @@
 import io
 import logging
+import os
 import tempfile
 import zipfile
 from pathlib import Path
@@ -26,8 +27,8 @@ class UnzipRepo:
 
     URLS = {
         "github": "https://github.com/{repo_slug}/archive/{branch}.zip",
+        "gitlab.cee": "https://gitlab.cee.redhat.com/{repo_slug}/-/archive/{branch}.zip",
         "gitlab": "https://gitlab.com/{repo_slug}/-/archive/{branch}.zip",
-        "gitlab-cee": "https://gitlab.cee.redhat.com/{repo_slug}/-/archive/{branch}.zip",
     }
     API_URLS = {"github": "https://api.github.com/repos/{repo_slug}/zipball/{branch}"}
 
@@ -36,45 +37,44 @@ class UnzipRepo:
         repo_slug: str,
         branch: str = "master",
         provider: str = "github",
-        auth_token: str = "",
     ):
         self.repo_slug = repo_slug
         self.branch = branch
         self.provider = provider
-        self.auth_token = auth_token
         self.destination: Optional[tempfile.TemporaryDirectory] = None
 
     def download_archive(self) -> bytes:
         """Download remote repo as a zip archive."""
-        if self.provider == "github" and self.auth_token:
-            request_url = self.API_URLS.get("github").format(
-                repo_slug=self.repo_slug, branch=self.branch
-            )
-            headers = {"Authorization": f"token {self.auth_token}"}
-        else:
-            request_url = self.URLS.get(self.provider, "").format(
-                repo_slug=self.repo_slug, branch=self.branch
-            )
-            headers = {}
+        token = (
+            os.environ.get("GITHUB_TOKEN")
+            if self.provider == "github"
+            else os.environ.get("GITLAB_TOKEN")
+        )
 
+        request_url = self.URLS.get(self.provider).format(
+            repo_slug=self.repo_slug, branch=self.branch
+        )
+        headers = {"Authorization": f"token {token}"}
         LOGGER.info(f"Downloading.. {request_url}")
 
         response, err, *__ = wait_for(
-            lambda: requests.get(request_url, headers=headers, verify=False),
+            lambda: requests.get(request_url, headers=headers, verify=True),
             delay=2,
             num_sec=7,
         )
         if err or not response.ok:
             LOGGER.error(f"Fail to download archive for '{self.repo_slug}': ({response}) {err}")
             raise DownloadFailed(f"{self.repo_slug}: {str(err)}.")
-
         return response.content
 
     def unzip_archive(self, archive: IO, destination: Path) -> None:
         """Unzip the archive."""
-        with zipfile.ZipFile(archive) as zip_ref:
-            zip_ref.extractall(destination)
-            LOGGER.info(f"Extracted '{self.repo_slug}' to '{destination}'")
+        try:
+            with zipfile.ZipFile(archive) as zip_ref:
+                zip_ref.extractall(destination)
+                LOGGER.info(f"Extracted '{self.repo_slug}' to '{destination}'")
+        except zipfile.BadZipFile:
+            LOGGER.error(f"The respository {self.repo_slug} might not be plublic.")
 
     def __enter__(self) -> Path:
         """Return path of the directory with the unzipped archive."""
