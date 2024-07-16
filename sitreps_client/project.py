@@ -22,9 +22,8 @@ LOGGER = getLogger(__name__)
 class ProjectGroup:
     """Project Group (bundle) which hold different Projects (components)."""
 
-    def __init__(self, name: str, title: str, projects: list = None):
+    def __init__(self, name: str, projects: list = None):
         self.name = name
-        self.title = title
         self.projects = projects if projects else []
 
     def __repr__(self):
@@ -36,7 +35,7 @@ class Repository:
 
     def __init__(
         self,
-        title: str,
+        name: str,
         url: str,
         branch: str = "master",
         type: str = "test",
@@ -44,7 +43,7 @@ class Repository:
         sonarqube: dict = None,
         unit_tests: dict = None,
     ):
-        self.title = title
+        self.name = name
         self.url = url
         self.branch = branch
         self.type = type
@@ -103,6 +102,7 @@ class Repository:
 
     def get_cloc(self, local_path=None):
         """Get CLOC of repository.
+
         Args:
             local_path: local path else it will download repository.
         """
@@ -166,7 +166,11 @@ class Project:
         self,
         name: str,
         default_config: dict,
-        project_group: ProjectGroup = None,
+        service_name: str | None = None,
+        jira_project: str | None = None,
+        jira_custom_filter: str | None = None,
+        jira_filters: dict | None = None,
+        project_group: ProjectGroup | None = None,
         conf_path: Path = CONF_PATH,
     ):
         self.name = name

@@ -4,7 +4,6 @@ from cached_property import cached_property
 from sonarqube import SonarQubeClient
 from sonarqube.utils.exceptions import NotFoundError
 
-
 LOGGER = logging.getLogger(__name__)
 
 METRIC_KEYS = ["code_smells", "bugs", "vulnerabilities", "security_hotspots"]
@@ -84,8 +83,13 @@ class SonarQubeProject:
 def get_sonar_metrics(project_key, host, token, branch):
     LOGGER.info(f"[SonarQube] Collecting metrics for {project_key}")
     sonar = SonarQubeProject(project_key=project_key, host=host, token=token, branch=branch)
-    measures = sonar.get_measures()
-    last_update_time = sonar.get_last_update_time()
+    try:
+        measures = sonar.get_measures()
+        last_update_time = sonar.get_last_update_time()
+    except NotFoundError as e:
+        LOGGER.error(e)
+        return None
+
     if measures:
         measures["sonar_last_analysis"] = last_update_time
     return measures

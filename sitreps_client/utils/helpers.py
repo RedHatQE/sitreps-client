@@ -64,11 +64,12 @@ def load_file(path):
 
 
 def merge_dicts(dict_a, dict_b):
-    """Merge dict_b into dict_a."""
+    """Merge x into y."""
     if not (isinstance(dict_a, dict) and isinstance(dict_b, dict)):
-        return dict_a
+        raise ValueError("Only dict can mergable.")
 
     mergeable = (list, set, tuple)
+
     for key, value in dict_b.items():
         if key in dict_a and isinstance(value, mergeable) and isinstance(dict_a[key], mergeable):
             new_list = set(dict_a[key]).union(value)
@@ -77,6 +78,7 @@ def merge_dicts(dict_a, dict_b):
             dict_a[key] = value
         else:
             merge_dicts(dict_a[key], value)
+
     return Box(dict_a)
 
 

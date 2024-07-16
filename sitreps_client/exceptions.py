@@ -19,3 +19,7 @@ class CodeCoverageError(SitrepsException):
 
 class IssuesError(SitrepsException):
     """Error in issues jira/bugzilla"""
+
+
+class UnitTestError(SitrepsError):
+    """Error in Unit tests."""

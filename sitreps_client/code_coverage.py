@@ -9,7 +9,6 @@ import requests
 from sitreps_client.exceptions import CodeCoverageError
 from sitreps_client.exceptions import SitrepsError
 from sitreps_client.utils.ci_downloader import CIDownloader
-from sitreps_client.utils.helpers import wait_for
 
 LOGGER = logging.getLogger(__name__)
 
@@ -17,63 +16,40 @@ LOGGER = logging.getLogger(__name__)
 class CodecovCoverage:
     """Code coverage from codecov.io."""
 
-    CODECOV_BRANCH_BASE = "https://codecov.io/api/gh/{repo_slug}/branch/{branch}?limit=1"
-    CODECOV_WEB_BASE = "https://codecov.io/gh/{repo_slug}/branch/{branch}/graph/badge.svg"
-
-    def __init__(self, repo_slug: str, branch: str = "master"):
+    def __init__(self, repo_slug: str):
         self.repo_slug = repo_slug
-        self.branch = branch
-
-    @property
-    def is_available(self) -> bool:
-        """Check if coverage data exists for given repository.
-
-        Try to download badge icon and check its status text.
-        """
-        response, err, *__ = wait_for(
-            lambda: requests.get(
-                self.CODECOV_WEB_BASE.format(repo_slug=self.repo_slug, branch=self.branch)
-            ),
-            delay=1,
-            num_sec=3,
-            ignore_falsy=True,
-        )
-        if err or not response:
-            LOGGER.warning(f"Coverage data is unavailable for '{self.repo_slug}:{self.branch}'")
-            return False
-
-        return ">unknown</text>" not in response.text
 
     def get_coverage(self) -> Optional[float]:
         """Get coverage info for the branch."""
-        response, err, *__ = wait_for(
-            lambda: requests.get(
-                self.CODECOV_BRANCH_BASE.format(repo_slug=self.repo_slug, branch=self.branch)
-            ),
-            delay=2,
-            num_sec=7,
-        )
-        if err:
-            msg = f'Failed to get code coverage for repo "{self.repo_slug}", failure: {str(err)}'
-            LOGGER.error(msg)
-            raise CodeCoverageError(msg)
+        org, repo = self.repo_slug.split("/")
+
+        url = f"https://api.codecov.io/api/v2/github/{org}/repos/{repo}"
+        headers = {"accept": "application/json"}
+        response = requests.get(url=url, headers=headers)
+
+        if response.status_code == 404:
+            msg = f'code-coverage not available for "{self.repo_slug}"'
+            LOGGER.info(msg)
+            return None
 
         if not (response or response.ok):
-            msg = f'Failed to download log for repo "{self.repo_slug} "' f"[{response.text}]"
+            msg = f'Failed to fetch code-coverage for "{self.repo_slug}" "[{response.text}]"'
             LOGGER.error(msg)
-            raise CodeCoverageError(msg)
+            return None
 
         response_json = response.json()
-        if response_json.get("commit", {}).get("totals", {}):
-            coverage_ratio_str = response_json.get("commit", {}).get("totals", {}).get("c")
-        elif response_json.get("commits", []):
-            coverage_ratio_str = response_json["commits"][0].get("totals", {}).get("c")
+        if response_json["active"]:
+            totals = response_json["totals"]
+            return {
+                "updatestamp": response_json["updatestamp"],
+                "lines": totals["lines"],
+                "hits": totals["hits"],
+                "misses": totals["misses"],
+                "partials": totals["partials"],
+                "coverage": totals["coverage"],
+            }
         else:
-            coverage_ratio_str = None
-        if coverage_ratio_str is None:
-            return None
-        coverage_ratio = float(coverage_ratio_str)
-        return coverage_ratio
+            LOGGER.warning(f"{self.repo_slug} is not active project on codecov.io.")
 
     def __repr__(self):
         return f"<CodecovCoverage(repo_slug={self.repo_slug})>"
@@ -129,7 +105,7 @@ class CICoverage:
         return f"<CICoverage(url={self.url})>"
 
 
-def get_code_coverage(repo_slug: str, branch: str = "master") -> Optional[float]:
+def get_code_coverage(repo_slug: str) -> Optional[float]:
     """Get code coverage from codecov.io
 
     Args:
@@ -139,8 +115,6 @@ def get_code_coverage(repo_slug: str, branch: str = "master") -> Optional[float]
     Returns:
         Optional[float]: code coverage
     """
-    code_cov = CodecovCoverage(repo_slug=repo_slug, branch=branch)
+    code_cov = CodecovCoverage(repo_slug=repo_slug)
     # TODO: Add CICoverage facility.
-    if code_cov.is_available:
-        return code_cov.get_coverage()
-    return None
+    return code_cov.get_coverage()

@@ -2,8 +2,8 @@ from pathlib import Path
 
 import pytest
 
-from sitreps_client.cloc import get_cloc
 from sitreps_client.cloc import PygountCloc
+from sitreps_client.cloc import get_cloc
 
 
 @pytest.mark.parametrize("_type", ["direct-path", "repo-slug"])
