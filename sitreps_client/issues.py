@@ -9,6 +9,7 @@ from cached_property import cached_property
 from jira import JIRA
 
 from sitreps_client.exceptions import IssuesError
+import time
 
 LOGGER = logging.getLogger(__name__)
 
@@ -103,6 +104,7 @@ class JiraIssue:
                 LOGGER.error("Something bad with jql fetch... skipping jira stats.")
                 return {}
             jira_stats[key] = {"count": count, "jql": jql_str}
+            time.sleep(2)  # To maintain rate limit.
         return jira_stats
 
 
