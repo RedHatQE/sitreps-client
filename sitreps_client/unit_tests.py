@@ -31,6 +31,7 @@ KNOWN_TESTING_TOOLS = (
     "junit",
     "other",
     "busted",
+    "cypress",
 )
 
 
@@ -74,6 +75,8 @@ class BaseUnitTests:
                 tools_found.append("maven")
             if "lualib" in line:
                 tools_found.append("busted")
+            if "cypress" in line:
+                tools_found.append("cypress")
 
         tools_found = set(tools_found)
 
@@ -207,6 +210,17 @@ class BaseUnitTests:
                 except (IndexError, AttributeError) as e:
                     LOGGER.error(f"LogParsing: {e}")
                 break
+
+            # cypress
+            if "cypress" in tools and "Tests:" in line:
+                LOGGER.debug(f"cypress: {line}")
+                try:
+                    tests_count += int(
+                        re.search(r"Tests:\s+([0-9]+)", line).group(1)  # type: ignore
+                    )
+                except (IndexError, AttributeError) as e:
+                    LOGGER.error(f"LogParsing: {e}")
+                continue
 
             # ??
             if "other" in tools and "Suite duration: " in line and " Tests: " in line:
