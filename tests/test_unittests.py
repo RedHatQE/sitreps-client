@@ -37,7 +37,6 @@ class TestUnitTests:
     def test_framework_summary(self, framework, expected):
         """Test different test frameworks and their results."""
         summary = self.get_summary()
-        print(summary)
         # Assert framework exists in the summary
         assert framework in summary
 
