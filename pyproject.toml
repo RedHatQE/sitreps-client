@@ -21,6 +21,7 @@ dependencies = [
 #  "PyTravisCI",
   "python-sonarqube-api",
   "cached-property",
+  "pyyaml",
 ]
 description = "A client help to collect different metrics."
 dynamic = ["version"]

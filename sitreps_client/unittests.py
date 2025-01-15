@@ -50,22 +50,24 @@ class BaseUnitTests:
         summary.update(self._parse_unittest(log))
         summary.update(self._parse_busted(log))
         summary.update(self._parse_go_test(log))
+        summary.update(self._parse_rspec(log))
+        summary.update(self._parse_minitest(log))
 
         return summary
 
     def _parse_jest(self, log: str) -> dict:
         """Parse Jest test framework."""
-        summary = {}
+        summary = {"jest": {"total": 0, "passed": 0, "failed": 0, "skipped": 0}}
+
         jest_pattern = re.compile(r"Tests:\s*[^\\n]*,\s*(\d+)\s*total", re.DOTALL)
         jest_count_pattern = re.compile(r"(\d+)\s*(passed|failed|skipped|total)", re.DOTALL)
 
-        if match := jest_pattern.search(log):
-            jest_counts = {"total": 0, "passed": 0, "failed": 0, "skipped": 0}
+        for match in jest_pattern.finditer(log):
             result_text = match.group(0)
             for value, key in jest_count_pattern.findall(result_text):
-                jest_counts[key] = int(value)
-            summary["jest"] = jest_counts
-        return summary
+                summary["jest"][key] += int(value)
+
+        return summary if summary["jest"]["total"] > 0 else {}
 
     def _parse_cypress(self, log: str) -> dict:
         """Parse Cypress test framework."""
@@ -99,81 +101,80 @@ class BaseUnitTests:
 
     def _parse_pytest(self, log: str) -> dict:
         """Parse Pytest test framework."""
-        summary = {}
-        pytest_total_tests_pattern = re.compile(r"collected\s*(\d+)\s*items")
+        summary = {"pytest": {"total": 0, "passed": 0, "failed": 0, "skipped": 0}}
+        pytest_total_tests_pattern = re.compile(
+            r"collected\s*(\d+)\s*items[\s\S]+?===\s*([^=]+?)\s*in\s*([\d\.]+[a-zA-Z]+)\s*==="
+        )
         pytest_count_pattern = re.compile(
             r"(\d+)\s*(passed|failed|skipped|xfailed|xpassed)", re.DOTALL
         )
 
-        if pytest_total_tests_pattern.search(log) and ("pytest" in log or "py.test" in log):
-            pytest_counts = {"total": 0, "passed": 0, "failed": 0, "skipped": 0}
-            pytest_counts["total"] = int(pytest_total_tests_pattern.search(log).group(1))
+        if "pytest" in log or "py.test" in log:
+            for match in pytest_total_tests_pattern.finditer(log):
+                summary["pytest"]["total"] += int(match.group(1))
 
-            for value, key in pytest_count_pattern.findall(log):
-                if key == "xfailed":
-                    pytest_counts["failed"] += int(value)
-                elif key == "xpassed":
-                    pytest_counts["passed"] += int(value)
-                else:
-                    pytest_counts[key] = int(value)
-            summary["pytest"] = pytest_counts
-        return summary
+                for value, key in pytest_count_pattern.findall(match.group(2)):
+                    if key == "xfailed":
+                        summary["pytest"]["failed"] += int(value)
+                    elif key == "xpassed":
+                        summary["pytest"]["passed"] += int(value)
+                    else:
+                        summary["pytest"][key] += int(value)
+        return summary if summary["pytest"]["total"] > 0 else {}
 
     def _parse_unittest(self, log: str) -> dict:
         """Parse Unittest test framework."""
-        summary = {}
-        unittest_total_tests_pattern = re.compile(r"Ran (\d+) tests")
+        summary = {"unittest": {"total": 0, "passed": 0, "failed": 0, "skipped": 0}}
+        unittest_total_tests_pattern = re.compile(
+            r"Ran (\d+) tests in (\d+\.\d+s|\d+s)\n+(\w+) \(([^)]+)\)"
+        )
         unittest_count_pattern = re.compile(
-            r"(failures|skipped|expected failures)=(\d+)", re.DOTALL
+            r"(failures|errors|skipped|expected failures)=(\d+)", re.DOTALL
         )
 
-        if total_match := unittest_total_tests_pattern.search(log):
-            unittest_counts = {"total": 0, "passed": 0, "failed": 0, "skipped": 0}
-            unittest_counts["total"] = int(total_match.group(1))
+        for match in unittest_total_tests_pattern.finditer(log):
+            summary["unittest"]["total"] += int(match.group(1))
 
-            for key, value in unittest_count_pattern.findall(log):
+            for key, value in unittest_count_pattern.findall(match.group(0)):
                 if key == "failures":
-                    unittest_counts["failed"] = int(value)
+                    summary["unittest"]["failed"] += int(value)
+                if key == "errors":
+                    summary["unittest"]["failed"] += int(value)
                 if key == "expected failures":
-                    unittest_counts["passed"] = int(value)
+                    summary["unittest"]["passed"] += int(value)
                 if key == "skipped":
-                    unittest_counts["skipped"] = int(value)
-            passed = (
-                unittest_counts["total"] - unittest_counts["failed"] - unittest_counts["skipped"]
+                    summary["unittest"]["skipped"] += int(value)
+
+        if summary["unittest"]["total"] > 0:
+            summary["unittest"]["passed"] = summary["unittest"]["total"] - (
+                summary["unittest"]["failed"] + summary["unittest"]["skipped"]
             )
-            unittest_counts["passed"] += passed
-            summary["unittest"] = unittest_counts
-        return summary
+            return summary
+        return {}
 
     def _parse_busted(self, log: str) -> dict:
         """Parse Busted test framework."""
-        summary = {}
+        summary = {"busted": {"total": 0, "passed": 0, "failed": 0, "skipped": 0}}
         busted_count_pattern = re.compile(
-            r"(\d+)\s*(successes|failures|errors|pending|skipped)", re.DOTALL
+            r"(\d+) success(es?)? \/ (\d+) failures? \/ (\d*) errors? \/ (\d*) pending :"
+            r" (\d+\.\d+) seconds",
+            re.DOTALL,
         )
-        if "busted" in log and "lua/" in log and busted_count_pattern.search(log):
-            busted_counts = {"total": 0, "passed": 0, "failed": 0, "errors": 0, "skipped": 0}
-            for value, key in busted_count_pattern.findall(log):
-                if key == "successes":
-                    busted_counts["passed"] += int(value)
-                if key == "failures":
-                    busted_counts["failed"] += int(value)
-                if key == "errors":
-                    busted_counts["errors"] += int(value)
-                if key == "pending":
-                    busted_counts["skipped"] += int(value)
-                if key == "skipped":
-                    busted_counts["skipped"] += int(value)
-            busted_counts["total"] = sum(busted_counts.values())
-            summary["busted"] = busted_counts
-        return summary
+
+        for match in busted_count_pattern.finditer(log):
+            summary["busted"]["passed"] += int(match.group(1))
+            summary["busted"]["failed"] += int(match.group(3))
+            summary["busted"]["failed"] += int(match.group(4))  # error
+            summary["busted"]["skipped"] += int(match.group(5))
+        summary["busted"]["total"] = sum(summary["busted"].values())
+        return summary if summary["busted"]["total"] > 0 else {}
 
     def _parse_go_test(self, log: str) -> dict:
         """Parse Go test framework."""
         summary = {}
         go_count_pattern = re.compile(r"=== RUN\s+(\S+)[\s\S]+?---\s+(PASS|FAIL|SKIP)", re.DOTALL)
         if go_count_pattern.search(log):
-            go_counts = {"passed": 0, "failed": 0, "errors": 0, "skipped": 0}
+            go_counts = {"passed": 0, "failed": 0, "skipped": 0}
             for _, key in go_count_pattern.findall(log):
                 if key == "PASS":
                     go_counts["passed"] += 1
@@ -182,8 +183,51 @@ class BaseUnitTests:
                 if key == "SKIP":
                     go_counts["skipped"] += 1
             go_counts["total"] = sum(go_counts.values())
-            summary["go test"] = go_counts
+            summary["gotest"] = go_counts
         return summary
+
+    def _parse_rspec(self, log: str) -> dict:
+        """Parse RSpec test framework.
+
+        https://rspec.info/
+        """
+        summary = {"rspec": {"total": 0, "passed": 0, "failed": 0, "skipped": 0}}
+
+        # Pattern to capture total examples and failures
+        rspec_detect_pattern = re.compile(r"(\d+)\s*examples,\s*(\d+)\s*failures", re.DOTALL)
+
+        if rspec_detect_pattern.search(log):  # Flag to detect RSpec output
+            for total, failed in rspec_detect_pattern.findall(log):
+                passed = int(total) - int(failed)  # Assuming passed = total - failed
+
+                # Accumulate the counts
+                summary["rspec"]["total"] += int(total)
+                summary["rspec"]["failed"] += int(failed)
+                summary["rspec"]["passed"] += passed
+        return summary if summary["rspec"]["total"] > 0 else {}
+
+    def _parse_minitest(self, log: str) -> dict:
+        """Parse Minitest test framework."""
+        summary = {"minitest": {"total": 0, "passed": 0, "failed": 0, "skipped": 0}}
+
+        # Pattern to capture test results: total, failures, errors, skips
+        minitest_count_pattern = re.compile(
+            r"(\d+) tests, (\d+) assertions, (\d+) failures, (\d+) errors, (\d+) skips", re.DOTALL
+        )
+        # Check for Minitest by detecting "rake test" or "run options --seed"
+        if ("rake test" in log or "run options --seed" in log) and minitest_count_pattern.search(
+            log
+        ):
+            for match in minitest_count_pattern.finditer(log):
+                tests = int(match.group(1))
+                failures_errors = int(match.group(3)) + int(match.group(4))
+                skips = int(match.group(5))
+                passed = tests - (failures_errors + skips)
+                summary["minitest"]["total"] += tests
+                summary["minitest"]["failed"] += failures_errors
+                summary["minitest"]["skipped"] += skips
+                summary["minitest"]["passed"] += passed
+        return summary if summary["minitest"]["total"] > 0 else {}
 
     def combine_summary_data(self, data: list) -> list[dict]:
         """Combine collected data from different frameworks into a unified summary."""
