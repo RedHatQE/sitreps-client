@@ -1,0 +1,672 @@
+python -m unittest test_foo.py                                                                                                            ✘ 1 main ✱ ◼
+ExsF.ss
+======================================================================
+ERROR: test_error (test_foo.TestSample.test_error)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ndhandre/RedHat/iqe/sitreps-client/test_foo.py", line 38, in test_error
+    raise ValueError("This test will raise an error")
+ValueError: This test will raise an error
+
+======================================================================
+FAIL: test_fail (test_foo.TestSample.test_fail)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ndhandre/RedHat/iqe/sitreps-client/test_foo.py", line 12, in test_fail
+    self.assertEqual(2 + 2, 5, "Should fail as 2 + 2 does not equal 5")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 4 != 5 : Should fail as 2 + 2 does not equal 5
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.001s
+
+FAILED (failures=1, errors=1, skipped=3, expected failures=1)
+
+
+
+
+python -m unittest test_foo.py                                                                                                                main ✱ ◼
+F.s
+======================================================================
+FAIL: test_fail (test_foo.TestSample.test_fail)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ndhandre/RedHat/iqe/sitreps-client/test_foo.py", line 13, in test_fail
+    self.assertEqual(2 + 2, 5, "Should fail as 2+2 does not equal 5")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 4 != 5 : Should fail as 2+2 does not equal 5
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.000s
+
+FAILED (failures=1, skipped=1)
+
+
+
+
+
+
+
+#----------------------------------------------------------- pytest 1st run 2 failed 1 passed 1 skip -----------------------------------------------------------------------------------
+================================================================================ test session starts =================================================================================
+platform linux -- Python 3.13.0, pytest-8.3.4, pluggy-1.5.0
+rootdir: /home/ndhandre/RedHat/iqe/sitreps-client
+configfile: pyproject.toml
+collected 4 items
+
+test_foo.py .FFs                                                                                                                                                               [100%]
+
+====================================================================================== FAILURES ======================================================================================
+_____________________________________________________________________________________ test_fail ______________________________________________________________________________________
+
+    def test_fail():
+>       assert 2 == 3
+E       assert 2 == 3
+
+test_foo.py:7: AssertionError
+_____________________________________________________________________________________ test_error _____________________________________________________________________________________
+
+    def test_error():
+        x = 0/3
+>       assert x
+E       assert 0.0
+
+test_foo.py:11: AssertionError
+============================================================================== short test summary info ===============================================================================
+FAILED test_foo.py::test_fail - assert 2 == 3
+FAILED test_foo.py::test_error - assert 0.0
+======================================================================= 2 failed, 1 passed, 1 skipped in 0.01s =======================================================================
+
+#----------------------------------------------------------- pytest 2nd run 1 failed 1 passed -----------------------------------------------------------------------------------
+configfile: pyproject.toml
+collected 2 items
+============================================================================ 1 failed, 1 passed in 0.01s =============================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#----------------------------------------------------------- jest 1st run 333 passed 4 failed 1 skipped -----------------------------------------------------------------------------------
+Test Suites: 2 failed, 60 passed, 62 total
+Tests:       4 failed, 1 skipped, 333 passed, 338 total
+Snapshots:   4 failed, 32 passed, 36 total
+Time:        98.357 s
+Ran all test suites.
+
+#----------------------------------------------------------- jest 2nd run 99 passed  -----------------------------------------------------------------------------------
+--------------------------------------------------------------------|---------|----------|---------|---------|---------------------------------------------------
+Test Suites: 16 passed, 16 total
+Tests:       99 passed, 99 total
+Snapshots:   16 passed, 16 total
+Time:        29.043 s
+Ran all test suites.
+
+
+
+
+
+
+
+
+
+
+
+#----------------------------------------------------------- cypress run -----------------------------------------------------------------------------------
+Opening Cypress...
+DevTools listening on ws://127.0.0.1:36369/devtools/browser/bf7276b7-f14d-420a-a597-2655d645b2cd
+Missing baseUrl in compilerOptions. tsconfig-paths will be skipped
+<i> [webpack-dev-server] Project is running at:
+<i> [webpack-dev-server] Loopback: http://localhost:8002/
+<i> [webpack-dev-server] Content not from webpack is served from '/home/travis/build/RedHatInsights/insights-advisor-frontend/dist' directory
+<i> [webpack-dev-server] 404s will fallback to '/index.html'
+====================================================================================================
+  (Run Starting)
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Cypress:        13.10.0                                                                        │
+  │ Browser:        Electron 118 (headless)                                                        │
+  │ Node Version:   v18.20.5 (/home/travis/.nvm/versions/node/v18.20.5/bin/node)                   │
+  │ Specs:          7 found (PresentationalComponents/Loading/Loading.cy.js, PresentationalCompone │
+  │                 nts/PathwaysTable/PathwaysTable.cy.js, PresentationalComponents/RulesTable/Rul │
+  │                 esTable.cy.js, PresentationalComponents/TopicsTable/TopicsTable.cy.js, SmartCo │
+  │                 mponents/Recs/DetailsR...)                                                     │
+  │ Searched:       src/**/*.cy.{js,ts,jsx,tsx}                                                    │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  Running:  PresentationalComponents/Loading/Loading.cy.js                                  (1 of 7)
+<i> [webpack-dev-middleware] wait until bundle finished: /__cypress/src/index.html
+48 assets
+4123 modules
+WARNING in ./node_modules/@redhat-cloud-services/frontend-components-utilities/esm/interceptors/interceptors.js 138:17-26
+export 'useChrome' (imported as 'useChrome') was not found in '@redhat-cloud-services/frontend-components/useChrome' (possible exports: default)
+webpack 5.95.0 compiled with 1 warning in 48520 ms
+No errors found.
+  Loading
+Cannot find coverage file /home/travis/build/RedHatInsights/insights-advisor-frontend/.nyc_output/out.json
+Skipping coverage report
+    ✓ Loading component exist (117ms)
+  1 passing (231ms)
+  (Results)
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        1                                                                                │
+  │ Passing:      0                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      1                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     0 seconds                                                                        │
+  │ Spec Ran:     PresentationalComponents/Loading/Loading.cy.js                                   │
+  └───────────────────────────���────────────────────────────────────────────────────────────────────┘
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  Running:  PresentationalComponents/PathwaysTable/PathwaysTable.cy.js                      (2 of 7)
+  Pathways table tests
+    defaults
+      ✓ The Pathways table renders (396ms)
+      ✓ renders toolbar (70ms)
+      ✓ renders table header (195ms)
+      ✓ links to the pathway detail page (196ms)
+    defaults
+      ✓ The amount of rows shown is 16 (282ms)
+      ✓ sorting using Recommendation level (172ms)
+    Sorting
+      ✓ ascending by Name (348ms)
+      ✓ descending by Name (482ms)
+      ✓ ascending by Systems (328ms)
+      ✓ descending by Systems (462ms)
+      ✓ ascending by Recommendation level (307ms)
+      ✓ descending by Recommendation level (414ms)
+    Multiple categories get abbreviated
+Cannot find coverage file /home/travis/build/RedHatInsights/insights-advisor-frontend/.nyc_output/out.json
+Skipping coverage report
+      ✓ Multiple categories get abbreviated (291ms)
+  13 passing (5s)
+  (Results)
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        13                                                                               │
+  │ Passing:      12                                                                               │
+  │ Failing:      0                                                                                │
+  │ Pending:      1                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     4 seconds                                                                        │
+  │ Spec Ran:     PresentationalComponents/PathwaysTable/PathwaysTable.cy.js                       │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  Running:  PresentationalComponents/RulesTable/RulesTable.cy.js                            (3 of 7)
+  test data
+    ✓ the first recommendation has systems impacted (37ms)
+  renders correctly
+    ✓ The Rules table renders (569ms)
+    ✓ renders toolbar (127ms)
+    ✓ renders table header (863ms)
+  defaults
+    ✓ pagination is set to 20 (807ms)
+    ✓ sorting using Total risk (776ms)
+    ✓ links to the recommendations detail page (842ms)
+    ✓ applies total risk "Enabled" and systems impacted "1 or more" filters (1700ms)
+    ✓ name filter is a default filter (108ms)
+    ✓ reset filters button is displayed (109ms)
+  pagination
+    ✓ shows correct total number of rules (771ms)
+    ✓ values are expected ones (1025ms)
+    ✓ can change page limit (4601ms)
+  filtering
+    ✓ can clear filters (2660ms)
+    ✓ no filters show all recommendations (1600ms)
+    ✓ will reset filters but not pagination and sorting (4658ms)
+  making request based on filters
+    ✓ apply Name filter (3594ms)
+    ✓ apply Risk of change filter (1739ms)
+    ✓ apply Total risk filter (5823ms)
+    ✓ apply Impact filter (1670ms)
+    ✓ apply Likelihood filter (5067ms)
+    ✓ apply Category filter (3223ms)
+    ✓ apply Incidents filter (5870ms)
+    ✓ apply Remediation filter (1783ms)
+    ✓ apply Reboot required filter (7453ms)
+    ✓ apply Status filter (963ms)
+    ✓ apply Systems impacted filter (4033ms)
+  sorting
+    ✓ ascending by Name (1736ms)
+    ✓ descending by Name (2859ms)
+    ✓ ascending by Modified (1780ms)
+    ✓ descending by Modified (3311ms)
+    ✓ ascending by Category (1768ms)
+    ✓ descending by Category (2813ms)
+    ✓ ascending by Total risk (1762ms)
+    ✓ descending by Total risk (2465ms)
+    ✓ ascending by Systems (1733ms)
+    ✓ descending by Systems (2671ms)
+    ✓ ascending by Remediation (2696ms)
+    ✓ descending by Remediation (3914ms)
+  pre-filled url search parameters 0
+    ✓ sorts properly even if url doesnt match params for table (1634ms)
+  pre-filled url search parameters 1
+    ✓ sorts properly even if url doesnt match params for table (1009ms)
+  content
+Cannot find coverage file /home/travis/build/RedHatInsights/insights-advisor-frontend/.nyc_output/out.json
+Skipping coverage report
+    ✓ has correct links (976ms)
+  42 passing (2m)
+  (Results)
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        42                                                                               │
+  │ Passing:      42                                                                               │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     1 minute, 43 seconds                                                             │
+  │ Spec Ran:     PresentationalComponents/RulesTable/RulesTable.cy.js                             │
+  └──────────────────────────────���─────────────────────────────────────────────────────────────────┘
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  Running:  PresentationalComponents/TopicsTable/TopicsTable.cy.js                          (4 of 7)
+  renders correctly
+    ✓ The Topics table renders (136ms)
+    ✓ renders table header (47ms)
+    ✓ links to the topic detail page (73ms)
+  defaults
+    ✓ sorting using Featured (43ms)
+  filtering
+    ✓ can clear filters (469ms)
+    ✓ can add filters (268ms)
+  sorting
+    ✓ ascending by Name (131ms)
+    ✓ descending by Name (210ms)
+    ✓ ascending by Featured (148ms)
+    ✓ descending by Featured (223ms)
+    ✓ ascending by Affected systems (139ms)
+Cannot find coverage file /home/travis/build/RedHatInsights/insights-advisor-frontend/.nyc_output/out.json
+Skipping coverage report
+    ✓ descending by Affected systems (224ms)
+  12 passing (3s)
+  (Results)
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        12                                                                               │
+  │ Passing:      12                                                                               │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     2 seconds                                                                        │
+  │ Spec Ran:     PresentationalComponents/TopicsTable/TopicsTable.cy.js                           │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+─────────────────────────────────────────────────────���──────────────────────────────────────────────
+
+  Running:  SmartComponents/Recs/DetailsRules.cy.js                                         (5 of 7)
+  test mock data
+    ✓ has total risk set to 4 (critical) (41ms)
+    ✓ reboot is required (16ms)
+  defaults
+    ✓ The Rules description component renders (163ms)
+    ✓ title and description are correct (72ms)
+    ✓ rule voting is rendered (56ms)
+    ✓ shows correct total risk and risk of change labels (52ms)
+    ✓ tells that reboot is required (48ms)
+Cannot find coverage file /home/travis/build/RedHatInsights/insights-advisor-frontend/.nyc_output/out.json
+Skipping coverage report
+    ✓ the request is sent when voted (2124ms)
+  8 passing (3s)
+  (Results)
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        8                                                                                │
+  │ Passing:      8                                                                                │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     2 seconds                                                                        │
+  │ Spec Ran:     SmartComponents/Recs/DetailsRules.cy.js                                          │
+  └─────────────────────────────���──────────────────────────────────────────────────────────────────┘
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  Running:  SmartComponents/SystemAdvisor/SystemAdvisor.cy.js                               (6 of 7)
+  system rules table
+    ✓ renders table (502ms)
+    ✓ renders table headers (374ms)
+    ✓ request to kcs contains all required ids (283ms)
+    sorting
+      ✓ ascending by Description (414ms)
+      ✓ descending by Description (517ms)
+      ✓ ascending by Modified (365ms)
+      ✓ descending by Modified (478ms)
+      ✓ ascending by First impacted (354ms)
+      ✓ descending by First impacted (464ms)
+      ✓ ascending by Total risk (336ms)
+      ✓ descending by Total risk (459ms)
+      ✓ ascending by Remediation (357ms)
+      ✓ descending by Remediation (436ms)
+    Toolbar actions
+      ✓ Should show remediation button when host is of type edge (219ms)
+      ✓ Should hide remediation button when host is of type edge (235ms)
+    BulkSelector
+Cannot find coverage file /home/travis/build/RedHatInsights/insights-advisor-frontend/.nyc_output/out.json
+Skipping coverage report
+      ✓ The Bulk selector shows the correct number of systems selected. (1118ms)
+  16 passing (8s)
+  (Results)
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        16                                                                               │
+  │ Passing:      16                                                                               │
+  │ Failing:      0                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     7 seconds                                                                        │
+  │ Spec Ran:     SmartComponents/SystemAdvisor/SystemAdvisor.cy.js                                │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+────────────────────────────────────────────────────────────────────────────────────────────────────
+
+  Running:  SmartComponents/Topics/Details.cy.js                                            (7 of 7)
+  Topic Details is loaded correctly for user with Edge systems
+    ✓ Correct deffault filters for Recommendation table (412ms)
+  Topic Details is loaded correctly for user without Edge systems
+Cannot find coverage file /home/travis/build/RedHatInsights/insights-advisor-frontend/.nyc_output/out.json
+Skipping coverage report
+    ✓ Correct deffault filters for Recommendation table (260ms)
+  2 passing (885ms)
+  (Results)
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ Tests:        2                                                                                │
+  │ Passing:      1                                                                                │
+  │ Failing:      1                                                                                │
+  │ Pending:      0                                                                                │
+  │ Skipped:      0                                                                                │
+  │ Screenshots:  0                                                                                │
+  │ Video:        false                                                                            │
+  │ Duration:     0 seconds                                                                        │
+  │ Spec Ran:     SmartComponents/Topics/Details.cy.js                                             │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+====================================================================================================
+  (Run Finished)
+       Spec                                              Tests  Passing  Failing  Pending  Skipped
+  ┌────────────────────────────────────────────────────────────────────────────────────────────────┐
+  │ ✔  PresentationalComponents/Loading/Lo      235ms        1        0        -        -        1 │
+  │    ading.cy.js                                                                                 │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  PresentationalComponents/PathwaysTa      00:04       13       12        -        1        - │
+  │    ble/PathwaysTable.cy.js                                                                     │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  PresentationalComponents/RulesTable      01:43       42       42        -        -        - │
+  │    /RulesTable.cy.js                                                                           │
+  ├──────────────────────────────────────���─────────────────────────────────────────────────────────┤
+  │ ✔  PresentationalComponents/TopicsTabl      00:02       12       12        -        -        - │
+  │    e/TopicsTable.cy.js                                                                         │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  SmartComponents/Recs/DetailsRules.c      00:02        8        8        -        -        - │
+  │    y.js                                                                                        │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  SmartComponents/SystemAdvisor/Syste      00:07       16       16        -        -        - │
+  │    mAdvisor.cy.js                                                                              │
+  ├────────────────────────────────────────────────────────────────────────────────────────────────┤
+  │ ✔  SmartComponents/Topics/Details.cy.j      888ms        2        1        1        -        - │
+  │    s                                                                                           │
+  └────────────────────────────────────────────────────────────────────────────────────────────────┘
+    ✔  All specs passed!                        02:02       94       91        1        1        1
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+go: downloading github.com/go-playground/locales v0.14.1
+	github.com/redhatinsights/vmaas/base		coverage: 0.0% of statements
+	github.com/redhatinsights/vmaas		coverage: 0.0% of statements
+	github.com/redhatinsights/vmaas/base/utils		coverage: 0.0% of statements
+	github.com/redhatinsights/vmaas/webapp		coverage: 0.0% of statements
+	github.com/redhatinsights/vmaas/webapp/routes		coverage: 0.0% of statements
+	github.com/redhatinsights/vmaas/webapp/middlewares		coverage: 0.0% of statements
+=== RUN   TestLiveness
+time="2025-01-11T08:12:36Z" level=info msg=request content_encoding= durationMs=0 method=GET remote_addr= status_code=200 url=/ user_agent=
+[GIN] 2025/01/11 - 08:12:36 | 200 |     228.901µs |                 | GET      "/"
+--- PASS: TestLiveness (0.00s)
+PASS
+coverage: 10.9% of statements
+ok  	github.com/redhatinsights/vmaas/base/core	1.032s	coverage: 10.9% of statements
+=== RUN   TestBindValidateJSON
+=== RUN   TestBindValidateJSON/empty_request
+=== RUN   TestBindValidateJSON/missing_module_name
+=== RUN   TestBindValidateJSON/missing_module_stream
+=== RUN   TestBindValidateJSON/module
+--- PASS: TestBindValidateJSON (0.00s)
+    --- PASS: TestBindValidateJSON/empty_request (0.00s)
+    --- PASS: TestBindValidateJSON/missing_module_name (0.00s)
+    --- PASS: TestBindValidateJSON/missing_module_stream (0.00s)
+    --- PASS: TestBindValidateJSON/module (0.00s)
+PASS
+coverage: 2.1% of statements
+
+
+
+
+
+
+
+
+
+
+
+Run bundle exec rails db -p < db/cyndi_setup_test.sql;
+NOTICE:  schema "inventory" already exists, skipping
+CREATE SCHEMA
+NOTICE:  drop cascades to view inventory.hosts
+DROP TABLE
+CREATE TABLE
+CREATE VIEW
+TRUNCATE TABLE
+/opt/hostedtoolcache/Ruby/3.3.5/x64/bin/ruby -I/home/runner/work/compliance-backend/compliance-backend/vendor/bundle/ruby/3.3.0/gems/rspec-core-3.13.2/lib:/home/runner/work/compliance-backend/compliance-backend/vendor/bundle/ruby/3.3.0/gems/rspec-support-3.13.2/lib /home/runner/work/compliance-backend/compliance-backend/vendor/bundle/ruby/3.3.0/gems/rspec-core-3.13.2/exe/rspec --pattern spec/requests/\*\*/\*_spec.rb,\ spec/api/\*\*/\*_spec.rb,\ spec/integration/\*\*/\*_spec.rb --format Rswag::Specs::SwaggerFormatter --order defined
+
+Benchmarks API
+  /benchmarks
+    get
+      lists all benchmarks requested
+        returns a 200 response
+  /benchmarks/{id}
+    get
+      benchmark not found
+        returns a 404 response
+      retrieves a benchmark
+        returns a 200 response
+
+Value Definitions
+  /security_guides/{security_guide_id}/value_definitions
+    get
+      Lists Value Definitions
+        returns a 200 response
+      Lists Value Definitions
+        returns a 200 response
+      Lists Value Definitions
+        returns a 200 response
+      Returns with Unprocessable Content
+        returns a 422 response
+      Returns with Unprocessable Content
+        returns a 422 response
+  /security_guides/{security_guide_id}/value_definitions/{value_definition_id}
+    get
+      Returns a Value Definition
+        returns a 200 response
+      Returns with Not Found
+        returns a 404 response
+
+Finished in 46.46 seconds (files took 2.59 seconds to load)
+100 examples, 5 failures
+
+
+
+Run bin/rake spec
+/opt/hostedtoolcache/Ruby/3.3.5/x64/bin/ruby -I/home/runner/work/compliance-backend/compliance-backend/vendor/bundle/ruby/3.3.0/gems/rspec-core-3.13.2/lib:/home/runner/work/compliance-backend/compliance-backend/vendor/bundle/ruby/3.3.0/gems/rspec-support-3.13.2/lib /home/runner/work/compliance-backend/compliance-backend/vendor/bundle/ruby/3.3.0/gems/rspec-core-3.13.2/exe/rspec --pattern spec/\*\*\{,/\*/\*\*\}/\*_spec.rb
+
+V2::ApplicationController
+  rbac_allowed?
+    cert based auth
+      calls valid_cert_auth?
+    with sufficient permissions
+      returns true
+    with insufficient permission
+      when only inventory:groups:read is permitted
+        results in rejecting access
+      when compliance:policy:read permission is missing
+        results in rejecting access
+      when inventory:hosts:read permission is missing
+        results in rejecting access
+  audit_success
+    calls Rails.logger.audit_success
+
+V2::RulePolicy
+  behaves like globally available
+    allows displaying all entities
+    authorizes the index and show actions
+
+Finished in 28 minutes 19 seconds (files took 3.2 seconds to load)
+200 examples, 10 failures
+
+
+
+
+
+
+
+
+
+
+
+
+
+Run bin/rake test
+Emptying /home/runner/work/compliance-backend/compliance-backend/test/reports
+Running 100 tests in parallel using 4 processes
+Started with run options --seed 50648
+
+
+Test is missing assertions: `test_result` /home/runner/work/compliance-backend/compliance-backend/test/services/concerns/xccdf/profiles_test.rb:8
+/home/runner/work/compliance-backend/compliance-backend/vendor/bundle/ruby/3.3.0/gems/railties-8.0.1/lib/rails/tasks/statistics.rake:4: warning: already initialized constant STATS_DIRECTORIES
+/home/runner/work/compliance-backend/compliance-backend/vendor/bundle/ruby/3.3.0/gems/railties-8.0.1/lib/rails/tasks/statistics.rake:4: warning: previous definition of STATS_DIRECTORIES was here
+/home/runner/work/compliance-backend/compliance-backend/vendor/bundle/ruby/3.3.0/gems/railties-8.0.1/lib/rails/tasks/statistics.rake:4: warning: already initialized constant STATS_DIRECTORIES
+/home/runner/work/compliance-backend/compliance-backend/vendor/bundle/ruby/3.3.0/gems/railties-8.0.1/lib/rails/tasks/statistics.rake:4: warning: previous definition of STATS_DIRECTORIES was here
+/home/runner/work/compliance-backend/compliance-backend/vendor/bundle/ruby/3.3.0/gems/railties-8.0.1/lib/rails/tasks/statistics.rake:4: warning: already initialized constant STATS_DIRECTORIES
+/home/runner/work/compliance-backend/compliance-backend/vendor/bundle/ruby/3.3.0/gems/railties-8.0.1/lib/rails/tasks/statistics.rake:4: warning: previous definition of STATS_DIRECTORIES was here
+Test is missing assertions: `test_basic_auth` /home/runner/work/compliance-backend/compliance-backend/test/lib/insights/api/common/platform_test.rb:13
+/home/runner/work/compliance-backend/compliance-backend/vendor/bundle/ruby/3.3.0/gems/railties-8.0.1/lib/rails/tasks/statistics.rake:4: warning: already initialized constant STATS_DIRECTORIES
+/home/runner/work/compliance-backend/compliance-backend/vendor/bundle/ruby/3.3.0/gems/railties-8.0.1/lib/rails/tasks/statistics.rake:4: warning: previous definition of STATS_DIRECTORIES was here
+Progress: |====================================================================|
+Writing XML reports to /home/runner/work/compliance-backend/compliance-backend/test/reports
+
+Finished in 26.35538s
+100 tests, 2244 assertions, 5 failures, 5 errors, 1 skips
+
+
+
+
+
+Run bin/rake test
+Emptying /home/runner/work/compliance-backend/compliance-backend/test/reports
+Running 10 tests in parallel using 4 processes
+Started with run options --seed 50648
+
+Finished in 26.35538s
+10 tests, 2244 assertions, 1 failures, 0 errors, 1 skips
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+busted spec/my_tests_spec.lua                                                                                                                 main ✱ ◼
+●◼◌
+10 success / 1 failure / 0 errors / 1 pending : 0.002212 seconds
+
+Pending → spec/my_tests_spec.lua @ 14
+My Test Suite should skip this test
+spec/my_tests_spec.lua:14: Skipping this test because of some reason
+
+Failure → spec/my_tests_spec.lua @ 9
+My Test Suite should fail this test
+spec/my_tests_spec.lua:10: Expected objects to be the same.
+Passed in:
+(boolean) false
+Expected:
+(boolean) true
+
+
+busted spec/my_tests_spec.lua                                                                                                                    ✘ 1 main ✱ ◼
+●◼◌✱●◼
+2 successes / 2 failures / 1 error / 1 pending : 0.004222 seconds
+
+Pending → spec/my_tests_spec.lua @ 16
+Sample Test Suite should be skipped
+spec/my_tests_spec.lua:16: This test is skipped for now.
+
+Failure → spec/my_tests_spec.lua @ 10
+Sample Test Suite should fail
+spec/my_tests_spec.lua:11: Expected objects to be equal.
+Passed in:
+(number) 2
+Expected:
+(number) 1
+
+Failure → spec/my_tests_spec.lua @ 30
+Sample Test Suite should fail again
+spec/my_tests_spec.lua:31: Expected objects to be the same.
+Passed in:
+(boolean) true
+Expected:
+(boolean) false
+
+Error → spec/my_tests_spec.lua @ 20
+Sample Test Suite should error
+spec/my_tests_spec.lua:21: Something went wrong!
